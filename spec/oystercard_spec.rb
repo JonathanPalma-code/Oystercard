@@ -14,6 +14,8 @@ describe Oystercard do
 
     it 'should return the balance' do # 1st time on top it up
       expect { card.top_up(1) }.to change { card.balance }.by 1 
+      # card.top_up(2)
+      # expect(card.balance).to eq 2
     end
 
     it 'should top up twice' do
@@ -24,7 +26,13 @@ describe Oystercard do
 
     context 'Raise an error when' do
       it 'exceed the maximum amount' do
-        expect { card.top_up balance_limit+1}.to raise_error BalanceError, "Over balance limit exceed: #{balance_limit + 1} / #{balance_limit}."
+        error = "Over balance limit exceed: #{balance_limit + 1} / #{balance_limit}."
+        expect { card.top_up balance_limit+1}.to raise_error BalanceError, error
+      end
+      it 'exceed the maximum amount by topping up' do
+        balance_limit.times { card.top_up(1) } # top up 90 times, 1£
+        error = "Over balance limit exceed: #{balance_limit + 50} / #{balance_limit}."
+        expect { card.top_up(50) }.to raise_error BalanceError, error
       end
     end
   end
