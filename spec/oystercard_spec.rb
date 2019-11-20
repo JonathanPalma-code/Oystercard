@@ -7,13 +7,14 @@ describe Oystercard do
   let(:maximum_balance) { Oystercard::MAXIMUM_BALANCE } # give a name for a constant variable
   let(:fare_price) { Oystercard::FARE_PRICE }
   let(:default_balance) {Oystercard::DEFAULT_BALANCE}
-  let(:station) { double :station }
+  let(:entry_station) { double :entry_station }
+  let(:exit_station) { double :exit_station }
 
   it 'returns 0£ when create it' do
     expect(card.balance).to eq default_balance
   end
   it 'is not in a journey' do
-    expect(card.station).to eq nil
+    expect(card.entry_station).to eq nil
   end
 
   describe '#top up' do
@@ -60,23 +61,28 @@ describe Oystercard do
     context 'raises an error when' do
       specify 'not enough money to deduct' do
         error = "Top up with minimum amount #{fare_price}"
-        expect { card.touch_in(station) }.to raise_error BalanceError, error
+        expect { card.touch_in(entry_station) }.to raise_error BalanceError, error
       end
     end
     it "records an entry station." do
-      expect(card_with_money.touch_in(station)).to eq station 
+      expect(card_with_money.touch_in(entry_station)).to eq entry_station
     end
   end
 
   describe "#touch_out" do
     it "Confirms that passenger is no longer in journey" do
-      expect(card_with_money.touch_out).to eq nil
+      expect(card_with_money.touch_out(exit_station)).to eq exit_station
+    end
+
+    it "records an exit station" do
+      card_with_money.touch_in(entry_station)
+      expect(card_with_money.touch_out(exit_station)).to eq exit_station
     end
   end
   describe "#in_journey" do
     it "confirms if passenger is NOT journey" do
-      card_with_money.touch_in(station)
-      expect(card_with_money.touch_out).to eq nil
+      card_with_money.touch_in(entry_station)
+      expect(card_with_money.touch_out(exit_station)).to eq exit_station
     end
   end
 end

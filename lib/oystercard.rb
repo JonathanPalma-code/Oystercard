@@ -5,10 +5,12 @@ class Oystercard
   # 2£ of fare
   FARE_PRICE = 2
   DEFAULT_BALANCE = 0
-  attr_reader :balance, :station
+  attr_reader :balance, :entry_station, :journey_story, :exit_station
 
   def initialize(balance = DEFAULT_BALANCE)
     @balance = balance
+    @journey_story = []
+    @entry_station
   end
 
   def top_up(amount)
@@ -21,15 +23,15 @@ class Oystercard
     @balance -= FARE_PRICE
   end
 
-  def touch_in(station)
+  def touch_in(entry_station)
     total = @balance - FARE_PRICE
     raise not_enough_funds if total < FARE_PRICE
-    balance > FARE_PRICE ? @station = station : nil
+    @entry_station = entry_station
   end
 
-  def touch_out
+  def touch_out(exit_station)
     deduct
-    station = nil
+    @exit_station = exit_station
   end
 
   private
