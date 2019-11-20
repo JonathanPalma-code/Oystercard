@@ -1,6 +1,9 @@
 class Oystercard
 
-  BALANCE_LIMIT = 90
+  # 90 of balance limit
+  MAXIMUM_BALANCE = 90 
+  # 2£ of fare
+  FARE_PRICE = 2 
   attr_reader :balance
 
   def initialize
@@ -8,14 +11,19 @@ class Oystercard
   end
   def top_up(amount)
     total = @balance + amount
-    raise over_balance_exceed(total) if total > BALANCE_LIMIT
+    raise over_balance_exceed(total) if total > MAXIMUM_BALANCE
     @balance += amount 
+  end
+  def deduct
+    total = @balance - FARE_PRICE
+    raise "no moneyyyyy" if total < 0
+    @balance -= FARE_PRICE
   end
 
   private
 
   def over_balance_exceed(total)
-    error = "Over balance limit exceed: #{total} / #{BALANCE_LIMIT}."
+    error = "Over balance limit exceed: #{total} / #{MAXIMUM_BALANCE}."
     BalanceError.new(error)
   end
 end
