@@ -4,10 +4,12 @@ class Oystercard
   MAXIMUM_BALANCE = 90
   # 2£ of fare
   FARE_PRICE = 2
+  DEFAULT_BALANCE = 0
   attr_reader :balance
 
-  def initialize
-    @balance = 0
+  def initialize(balance = DEFAULT_BALANCE)
+    @balance = balance
+    @in_journey = false
   end
   def top_up(amount)
     total = @balance + amount
@@ -16,9 +18,17 @@ class Oystercard
   end
   def deduct
     total = @balance - FARE_PRICE
-    error = "Top up with minimum amount #{FARE_PRICE}"
-    raise error if total < FARE_PRICE
+    raise not_enough_funds if total < FARE_PRICE
     @balance -= FARE_PRICE
+  end
+
+  def touch_in
+   balance > FARE_PRICE ? !@in_journey : @in_journey
+  end
+
+  def touch_out
+    deduct
+    @in_journey = false
   end
 
   private
@@ -27,6 +37,12 @@ class Oystercard
     error = "Over balance limit exceed: #{total} / #{MAXIMUM_BALANCE}."
     BalanceError.new(error)
   end
+
+  def not_enough_funds
+    error = "Top up with minimum amount #{FARE_PRICE}"
+    BalanceError.new(error)
+  end
+
 end
 
 class BalanceError < StandardError
