@@ -14,7 +14,7 @@ describe Oystercard do
     it { is_expected.to respond_to(:top_up).with(1).argument }
 
     it 'returns the balance' do # 1st time on top it up
-      expect { card.top_up(1) }.to change { card.balance }.by 1 
+      expect { card.top_up(1) }.to change { card.balance }.by 1
       # card.top_up(2)
       # expect(card.balance).to eq 2
     end
@@ -43,11 +43,10 @@ describe Oystercard do
       card.deduct
       expect(card.balance).to eq 3
     end
+
     context 'raises an error when' do
       specify 'not enough money to deduct' do
-        card.top_up(1)
-        card.deduct
-        expect { card.balance < 0 }.to raise_error "no moneyyyyy"
+        expect { card.deduct }.to raise_error "Top up with minimum amount #{fare_price}"
       end
     end
   end
