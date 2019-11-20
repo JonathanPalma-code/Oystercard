@@ -9,6 +9,7 @@ describe Oystercard do
   let(:default_balance) {Oystercard::DEFAULT_BALANCE}
   let(:entry_station) { double :entry_station }
   let(:exit_station) { double :exit_station }
+  let(:journey) { {entry_station: entry_station, exit_station: exit_station} }
 
   it 'returns 0£ when create it' do
     expect(card.balance).to eq default_balance
@@ -34,12 +35,14 @@ describe Oystercard do
 
     context 'raises an error when' do
       it 'exceeds the maximum amount' do
-        error = "Over balance limit exceed: #{maximum_balance + 1} / #{maximum_balance}."
+        maximum_exceeded = "#{maximum_balance + 1} / #{maximum_balance}"
+        error = "Over balance limit exceed: #{maximum_exceeded}."
         expect { card.top_up maximum_balance+1}.to raise_error BalanceError, error
       end
       it 'exceeds the maximum amount by topping up' do
         maximum_balance.times { card.top_up(1) } # top up 90 times, 1£
-        error = "Over balance limit exceed: #{maximum_balance + 50} / #{maximum_balance}."
+        maximum_exceeded = "#{maximum_balance + 50} / #{maximum_balance}"
+        error = "Over balance limit exceed: #{maximum_exceeded}."
         expect { card.top_up(50) }.to raise_error BalanceError, error
       end
     end
@@ -70,19 +73,13 @@ describe Oystercard do
   end
 
   describe "#touch_out" do
-    it "Confirms that passenger is no longer in journey" do
-      expect(card_with_money.touch_out(exit_station)).to eq exit_station
-    end
 
-    it "records an exit station" do
+    it "records the journey" do
       card_with_money.touch_in(entry_station)
-      expect(card_with_money.touch_out(exit_station)).to eq exit_station
+      card_with_money.touch_out(exit_station)
+      record = card_with_money.record_journey(entry_station,exit_station)
+      expect(record).to eq [journey]
     end
   end
-  describe "#in_journey" do
-    it "confirms if passenger is NOT journey" do
-      card_with_money.touch_in(entry_station)
-      expect(card_with_money.touch_out(exit_station)).to eq exit_station
-    end
-  end
+
 end

@@ -34,6 +34,10 @@ class Oystercard
     @exit_station = exit_station
   end
 
+  def record_journey(entry_station, exit_station)
+    @journey_story << {entry_station: @entry_station, exit_station: @exit_station}
+  end
+
   private
 
   def over_balance_exceed(total)
