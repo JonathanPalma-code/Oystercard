@@ -11,14 +11,16 @@ describe Oystercard do
   let(:exit_station) { double :exit_station }
   let(:journey) { {entry_station: entry_station, exit_station: exit_station} }
 
-  it 'returns 0£ when create it' do
-    expect(card.balance).to eq default_balance
+  context 'when create it' do
+    it 'comes with 0£' do
+      expect(card.balance).to eq default_balance
+    end
   end
-  it 'is not in a journey' do
-    expect(card.entry_station).to eq nil
-  end
+  # it 'is not in a journey' do
+  #   expect(card.entry_station).to eq nil
+  # end
 
-  describe '#top up' do
+  context 'when #top_up' do
     it { is_expected.to respond_to(:top_up).with(1).argument }
 
     it 'returns the balance' do # 1st time on top it up
@@ -27,14 +29,14 @@ describe Oystercard do
       # expect(card.balance).to eq 2
     end
 
-    it 'tops up twice' do
+    it 'twice in one go' do
       card.top_up(2)
       card.top_up(3)
       expect(card.balance).to eq 5
     end
 
-    context 'raises an error when' do
-      it 'exceeds the maximum amount' do
+    describe 'raise error' do
+      specify 'maximum amount exceeded' do
         maximum_exceeded = "#{maximum_balance + 1} / #{maximum_balance}"
         error = "Over balance limit exceed: #{maximum_exceeded}."
         expect { card.top_up maximum_balance+1}.to raise_error BalanceError, error
@@ -47,38 +49,36 @@ describe Oystercard do
       end
     end
   end
-  describe '#deduct' do
+  context 'when #deduct' do
     it 'deducts fare price from its balance' do
       card.top_up(5)
       card.deduct
       expect(card.balance).to eq 3
     end
   end
-
-  describe "#touch_in" do
-    # it "Approves that passenger is in journey" do
-    #   card.top_up(89)
-    #   expect(card.touch_in(:station)).to eq(true)
-    # end
-
-    context 'raises an error when' do
+  context "when #touch_in" do
+    specify "records the entry station" do
+      expect(card_with_money.touch_in(entry_station)).to eq entry_station
+    end
+    describe 'raise error' do
       specify 'not enough money to deduct' do
         error = "Top up with minimum amount #{fare_price}"
         expect { card.touch_in(entry_station) }.to raise_error BalanceError, error
       end
     end
-    it "records an entry station." do
-      expect(card_with_money.touch_in(entry_station)).to eq entry_station
-    end
   end
-
-  describe "#touch_out" do
-
+  context "when #touch_out" do
     it "records the journey" do
       card_with_money.touch_in(entry_station)
       card_with_money.touch_out(exit_station)
-      record = card_with_money.record_journey(entry_station,exit_station)
+      record = card_with_money.record_journey(entry_station, exit_station)
       expect(record).to eq [journey]
+    end
+    describe 'Error' do
+      specify 'touch in recorded unsuccessfully' do
+        error = "Invalid operation: Card was not touched in."
+        expect { card_with_money.touch_out(exit_station) }.to raise_error OperationError, error
+      end
     end
   end
 

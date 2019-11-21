@@ -10,7 +10,7 @@ class Oystercard
   def initialize(balance = DEFAULT_BALANCE)
     @balance = balance
     @journey_story = []
-    @entry_station
+    # @entry_station
   end
 
   def top_up(amount)
@@ -30,6 +30,7 @@ class Oystercard
   end
 
   def touch_out(exit_station)
+    raise no_touched_in if @entry_station == nil 
     deduct
     @exit_station = exit_station
   end
@@ -50,7 +51,15 @@ class Oystercard
     BalanceError.new(error)
   end
 
+  def no_touched_in
+    error = "Invalid operation: Card was not touched in."
+    OperationError.new(error)
+  end
+
 end
 
 class BalanceError < StandardError
+end
+
+class OperationError < StandardError
 end
