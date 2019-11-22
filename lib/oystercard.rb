@@ -10,6 +10,7 @@ class Oystercard
   def initialize(balance = DEFAULT_CARD_BALANCE)
     @balance = balance
     @journey_story = []
+    @journey_log = Journey_log.new
     @journey = Journey.new
     # @entry_station
   end
@@ -23,12 +24,12 @@ class Oystercard
   def touch_in(entry_station)
     total = @balance - FARE_PRICE
     raise not_enough_funds if total < FARE_PRICE
-    @journey.start(entry_station)
+    @journey_log.start(entry_station)
   end
 
   def touch_out(exit_station)
-    # raise no_touched_in if @entry_station == nil 
-    @journey.finish(exit_station)
+    # raise no_touched_in if @entry_station == nil
+    @journey_log.end(exit_station)
     deduct
   end
 
