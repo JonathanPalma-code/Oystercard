@@ -6,14 +6,14 @@ describe Oystercard do
   subject(:card_with_money) { described_class.new(10)}
   let(:maximum_balance) { Oystercard::MAXIMUM_BALANCE } # give a name for a constant variable
   let(:fare_price) { Oystercard::FARE_PRICE }
-  let(:default_balance) {Oystercard::DEFAULT_BALANCE}
+  let(:default_card_balance) {Oystercard::DEFAULT_CARD_BALANCE}
   let(:entry_station) { double :entry_station }
   let(:exit_station) { double :exit_station }
   let(:journey) { {entry_station: entry_station, exit_station: exit_station} }
 
   describe '#initialize' do
     it 'comes with 0£' do
-      expect(card.balance).to eq default_balance
+      expect(card.balance).to eq default_card_balance
     end
   end
   # it 'is not in a journey' do
@@ -51,9 +51,8 @@ describe Oystercard do
   end
   describe '#deduct' do
     it 'deducts fare price from its balance' do
-      card.top_up(5)
-      card.deduct
-      expect(card.balance).to eq 3
+      card_with_money.touch_in(entry_station)
+      expect{ card_with_money.touch_out(exit_station) }.to change{ card_with_money.balance }.by(-fare_price)
     end
     # context 'raises error when' do
     #   it 'raise error when trying to deduct 0£' do
@@ -72,19 +71,25 @@ describe Oystercard do
       end
     end
   end
-  context "when #touch_out" do
-    it "records the journey" do
+  describe "#touch_out" do
+
+    it "a fare is charged when touched out" do
       card_with_money.touch_in(entry_station)
       card_with_money.touch_out(exit_station)
-      record = card_with_money.record_journey(entry_station, exit_station)
-      expect(record).to eq [journey]
-    end
-    context 'raises error when' do
-      specify 'touch in recorded unsuccessfully' do
-        error = "Invalid operation: Card was not touched in."
-        expect { card_with_money.touch_out(exit_station) }.to raise_error OperationError, error
-      end
-    end
+      expect{card_with_money.touch_out(exit_station)}.to change{card_with_money.balance}.by(-fare_price)
+    end 
+    # it "records the journey" do
+    #   card_with_money.touch_in(entry_station)
+    #   card_with_money.touch_out(exit_station)
+    #   record = card_with_money.record_journey(entry_station, exit_station)
+    #   expect(record).to eq [journey]
+    # end
+    # context 'raises error when' do
+    #   specify 'touch in recorded unsuccessfully' do
+    #     error = "Invalid operation: Card was not touched in."
+    #     expect { card_with_money.touch_out(exit_station) }.to raise_error OperationError, error
+    #   end
+    # end
   end
 
 end

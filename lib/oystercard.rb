@@ -2,14 +2,15 @@ class Oystercard
 
   # 90 of balance limit
   MAXIMUM_BALANCE = 90
-  # 2£ of fare
-  FARE_PRICE = 2
-  DEFAULT_BALANCE = 0
+  # 1£ of fare
+  FARE_PRICE = 1
+  DEFAULT_CARD_BALANCE = 0
   attr_reader :balance, :entry_station, :journey_story, :exit_station
 
-  def initialize(balance = DEFAULT_BALANCE)
+  def initialize(balance = DEFAULT_CARD_BALANCE)
     @balance = balance
     @journey_story = []
+    @journey = Journey.new
     # @entry_station
   end
 
@@ -19,20 +20,16 @@ class Oystercard
     @balance += amount
   end
 
-  def deduct
-    @balance -= FARE_PRICE
-  end
-
   def touch_in(entry_station)
     total = @balance - FARE_PRICE
     raise not_enough_funds if total < FARE_PRICE
-    @entry_station = entry_station
+    @journey.start(entry_station)
   end
 
   def touch_out(exit_station)
-    raise no_touched_in if @entry_station == nil 
+    # raise no_touched_in if @entry_station == nil 
+    @journey.finish(exit_station)
     deduct
-    @exit_station = exit_station
   end
 
   def record_journey(entry_station, exit_station)
@@ -40,6 +37,10 @@ class Oystercard
   end
 
   private
+
+  def deduct
+    @balance -= @journey.fare
+  end
 
   def over_balance_exceed(total)
     error = "Over balance limit exceed: #{total} / #{MAXIMUM_BALANCE}."
